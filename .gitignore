@@ -1,19 +1,293 @@
+# =============================================================================
+# SKEIN Engine .gitignore
+# Windows x64 | CMake | Ninja | MSVC | clang-cl
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Build output
+# -----------------------------------------------------------------------------
+
 /Build/
 /Install/
-/.vs/
-/.idea/
-/.vscode/*
-!/.vscode/extensions.json
-!/.vscode/settings.json
+/Out/
+/Bin/
+/Lib/
+/Intermediate/
+/Artifacts/
+/Generated/
 
-*.user
+# Common CMake build directories
+/build/
+/build-*/
+/cmake-build-*/
+/out/
+
+# -----------------------------------------------------------------------------
+# CMake
+# -----------------------------------------------------------------------------
+
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+CTestTestfile.cmake
+CPackConfig.cmake
+CPackSourceConfig.cmake
+Makefile
+install_manifest.txt
+compile_commands.json
+CMakeUserPresets.json
+
+# Generated dependency metadata
+_deps/
+Testing/
+
+# -----------------------------------------------------------------------------
+# Ninja
+# -----------------------------------------------------------------------------
+
+.ninja_deps
+.ninja_log
+build.ninja
+rules.ninja
+
+# -----------------------------------------------------------------------------
+# Visual Studio
+# -----------------------------------------------------------------------------
+
+.vs/
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
 *.suo
+*.user
+*.userosscache
+*.sln.docstates
 *.VC.db
 *.VC.opendb
-*.pdb
-*.ilk
-*.obj
-*.pch
-*.log
+*.code-workspace
 
-CMakeUserPresets.json
+# Visual Studio profiling and diagnostics
+*.vsp
+*.vspx
+*.sap
+*.coverage
+*.coveragexml
+
+# -----------------------------------------------------------------------------
+# MSVC / clang-cl compiler output
+# -----------------------------------------------------------------------------
+
+*.obj
+*.o
+*.pch
+*.pchi
+*.ipch
+*.idb
+*.iobj
+*.ipdb
+*.ilk
+*.exp
+*.lib
+*.dll
+*.exe
+*.pdb
+*.map
+*.tlog
+*.lastbuildstate
+*.recipe
+*.res
+*.manifest
+
+# Incremental and optimisation databases
+*.pgc
+*.pgd
+*.pgo
+
+# -----------------------------------------------------------------------------
+# Clang / LLVM
+# -----------------------------------------------------------------------------
+
+.cache/
+.clangd/
+*.d
+*.dia
+*.profraw
+*.profdata
+*.gcda
+*.gcno
+
+# Static analysis output
+*.plist
+*.sarif
+
+# -----------------------------------------------------------------------------
+# IDEs and editors
+# -----------------------------------------------------------------------------
+
+# Visual Studio Code
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+
+# JetBrains
+.idea/
+*.iml
+
+# Sublime Text
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+\#*\#
+.#*
+
+# -----------------------------------------------------------------------------
+# Windows and operating system files
+# -----------------------------------------------------------------------------
+
+Thumbs.db
+Thumbs.db:encryptable
+Desktop.ini
+$RECYCLE.BIN/
+*.stackdump
+
+# -----------------------------------------------------------------------------
+# Logs, crashes, traces, and profiling
+# -----------------------------------------------------------------------------
+
+*.log
+*.dmp
+*.mdmp
+*.core
+*.trace
+*.utrace
+*.etl
+*.pix3
+*.wpix
+*.rdc
+
+/Logs/
+/Crashes/
+/Profiling/
+/Traces/
+/Captures/
+/Diagnostics/
+
+# -----------------------------------------------------------------------------
+# Runtime and editor-generated data
+# -----------------------------------------------------------------------------
+
+/Saved/
+/Cache/
+/Temp/
+/Tmp/
+/DerivedDataCache/
+/ShaderCache/
+/AssetCache/
+/Cooked/
+/Packages/
+/Staging/
+
+# Local project state
+/.skein/
+/.skein-local/
+/UserSettings/
+/LocalSettings/
+
+# Autosaves and backups
+/Autosaves/
+/Backups/
+*.bak
+*.tmp
+*.temp
+
+# -----------------------------------------------------------------------------
+# Third-party dependency managers
+# -----------------------------------------------------------------------------
+
+# vcpkg
+/vcpkg_installed/
+/vcpkg/
+/.vcpkg-root
+
+# Conan
+/conan/
+/.conan/
+conan.lock
+
+# NuGet
+packages/
+*.nupkg
+*.snupkg
+
+# -----------------------------------------------------------------------------
+# Documentation build output
+# -----------------------------------------------------------------------------
+
+/Docs/Build/
+/Docs/_build/
+/Documentation/Build/
+
+# -----------------------------------------------------------------------------
+# Test output
+# -----------------------------------------------------------------------------
+
+/TestResults/
+/Tests/Output/
+*.testlog
+*.trx
+*.xml
+
+# -----------------------------------------------------------------------------
+# SKEIN-specific generated files
+# -----------------------------------------------------------------------------
+
+# SkeinInsights capture data
+*.skeintrace
+*.skeinprofile
+
+# Generated reflection, scripting, and asset metadata
+*.generated.h
+*.generated.cpp
+*.skeinbytecode
+*.skeincache
+
+# Shader compiler output
+*.dxil
+*.spv
+*.shadercache
+
+# Packaged engine/game archives
+*.skeinpak
+
+# -----------------------------------------------------------------------------
+# Local secrets and machine-specific configuration
+# -----------------------------------------------------------------------------
+
+.env
+.env.*
+!.env.example
+
+*.local
+*.secret
+*.secrets
+
+# Certificates and keys
+*.pfx
+*.p12
+*.pem
+*.key
+*.crt
+
+# -----------------------------------------------------------------------------
+# Keep markers for otherwise-empty source directories
+# -----------------------------------------------------------------------------
+
+!.gitkeep
