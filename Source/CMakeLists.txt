@@ -1,0 +1,10 @@
+add_subdirectory(Foundation)
+add_subdirectory(Platform)
+add_subdirectory(Core)
+add_subdirectory(UI)
+add_subdirectory(Insights)
+add_subdirectory(Runtime)
+
+if(SKEIN_BUILD_EDITOR)
+    add_subdirectory(Editor)
+endif()
