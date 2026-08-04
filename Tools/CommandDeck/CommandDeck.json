@@ -1,0 +1,124 @@
+{
+  "schemaVersion": 1,
+  "repositoryRoot": null,
+  "defaultProfile": "full",
+  "windowNamePrefix": "skein",
+  "wslDistribution": null,
+  "wslMountRoot": "/mnt",
+  "visualStudio": {
+    "installationPath": null,
+    "arch": "amd64",
+    "hostArch": "amd64"
+  },
+  "executables": {
+    "wt": null,
+    "python": null,
+    "powershell": null,
+    "git": null,
+    "bash": null,
+    "wsl": null,
+    "vswhere": null
+  },
+  "logging": {
+    "enabled": false,
+    "directory": "Logs/CommandDeck"
+  },
+  "profiles": {
+    "full": {
+      "windowName": "skein-full",
+      "panes": [
+        {
+          "id": "build",
+          "kind": "cmakeBuild",
+          "title": "SKEIN - CMAKE BUILD",
+          "required": true
+        },
+        {
+          "id": "git",
+          "kind": "gitBash",
+          "title": "SKEIN - GIT BASH",
+          "required": true
+        },
+        {
+          "id": "vs",
+          "kind": "vsDeveloper",
+          "title": "SKEIN - VS DEVELOPER",
+          "required": true
+        }
+      ],
+      "layout": {
+        "root": "build",
+        "operations": [
+          {
+            "split": "vertical",
+            "from": "build",
+            "create": "git",
+            "size": 0.42
+          },
+          {
+            "split": "horizontal",
+            "from": "git",
+            "create": "vs",
+            "size": 0.5
+          }
+        ]
+      }
+    },
+    "build": {
+      "windowName": "skein-build",
+      "panes": [
+        {
+          "id": "build",
+          "kind": "cmakeBuild",
+          "title": "SKEIN - CMAKE BUILD",
+          "required": true
+        },
+        {
+          "id": "vs",
+          "kind": "vsDeveloper",
+          "title": "SKEIN - VS DEVELOPER",
+          "required": true
+        }
+      ],
+      "layout": {
+        "root": "build",
+        "operations": [
+          {
+            "split": "vertical",
+            "from": "build",
+            "create": "vs",
+            "size": 0.42
+          }
+        ]
+      }
+    },
+    "git": {
+      "windowName": "skein-git",
+      "panes": [
+        {
+          "id": "git",
+          "kind": "gitBash",
+          "title": "SKEIN - GIT BASH",
+          "required": true
+        },
+        {
+          "id": "vs",
+          "kind": "vsDeveloper",
+          "title": "SKEIN - VS DEVELOPER",
+          "required": true
+        }
+      ],
+      "layout": {
+        "root": "git",
+        "operations": [
+          {
+            "split": "vertical",
+            "from": "git",
+            "create": "vs",
+            "size": 0.5
+          }
+        ]
+      }
+    }
+  }
+}

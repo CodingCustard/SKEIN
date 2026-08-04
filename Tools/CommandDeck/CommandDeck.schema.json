@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codingcustard.example/skein/command-deck.schema.json",
+  "title": "SKEIN Command Deck Configuration",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "defaultProfile",
+    "profiles"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "repositoryRoot": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "defaultProfile": {
+      "type": "string"
+    },
+    "windowNamePrefix": {
+      "type": "string"
+    },
+    "wslDistribution": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "wslMountRoot": {
+      "type": "string"
+    },
+    "visualStudio": {
+      "type": "object"
+    },
+    "executables": {
+      "type": "object"
+    },
+    "logging": {
+      "type": "object"
+    },
+    "profiles": {
+      "type": "object"
+    }
+  },
+  "additionalProperties": false
+}
