@@ -32,3 +32,20 @@ add_test(
     NAME Skein.Volume01.Chapter01_04.BuildConfiguration
     COMMAND SkeinBuildConfigurationTests
 )
+
+add_executable(SkeinFoundationTypesTests
+    Foundation/FoundationTypesTests.cpp
+)
+
+target_link_libraries(SkeinFoundationTypesTests
+    PRIVATE
+        SKEIN::ProjectOptions
+        SKEIN::Foundation
+)
+
+skein_apply_warnings(SkeinFoundationTypesTests)
+
+add_test(
+    NAME Skein.Volume01.Chapter01_05.FoundationTypes
+    COMMAND SkeinFoundationTypesTests
+)

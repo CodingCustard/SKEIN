@@ -20,7 +20,10 @@ configure_file(
 add_library(SkeinFoundation STATIC
     Private/Log.cpp
     Public/Skein/Foundation/Build.h
+    Public/Skein/Foundation/Endian.h
     Public/Skein/Foundation/Log.h
+    Public/Skein/Foundation/StrongId.h
+    Public/Skein/Foundation/Types.h
 )
 
 add_library(SKEIN::Foundation ALIAS SkeinFoundation)
