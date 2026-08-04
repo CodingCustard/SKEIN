@@ -17,6 +17,7 @@ target_link_libraries(SkeinPlatform
 
 if(WIN32)
     target_compile_definitions(SkeinPlatform PRIVATE SKEIN_PLATFORM_WINDOWS=1)
+    target_link_libraries(SkeinPlatform PRIVATE dbghelp ole32 shell32 user32)
 endif()
 
 skein_apply_warnings(SkeinPlatform)

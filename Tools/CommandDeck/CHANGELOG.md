@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.4
+
+- Added a native `test` command that configures, builds, and runs a selected CMake test preset.
+- Added `test --all` for the complete preset matrix and `--no-build` for CTest-only runs.
+- Added an interactive-menu action for the default `msvc-debug` tests.
+- Added a Visual Studio developer-environment test launcher with exit-code propagation.
+
 ## v1.3
 
 - Fixed Git pane selection so Git for Windows Bash is preferred over generic `bash.exe` shims on `PATH`.

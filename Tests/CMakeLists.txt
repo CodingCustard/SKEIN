@@ -117,3 +117,20 @@ add_test(
     NAME Skein.Volume01.Chapter01_09.MemoryArchitecture
     COMMAND SkeinMemoryArchitectureTests
 )
+
+add_executable(SkeinWindowsPlatformTests
+    Platform/WindowsPlatformTests.cpp
+)
+
+target_link_libraries(SkeinWindowsPlatformTests
+    PRIVATE
+        SKEIN::ProjectOptions
+        SKEIN::Platform
+)
+
+skein_apply_warnings(SkeinWindowsPlatformTests)
+
+add_test(
+    NAME Skein.Volume01.Chapter01_10.WindowsPlatform
+    COMMAND SkeinWindowsPlatformTests
+)

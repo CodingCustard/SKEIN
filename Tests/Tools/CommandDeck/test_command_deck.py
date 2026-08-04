@@ -122,6 +122,61 @@ class CommandDeckTests(unittest.TestCase):
             self.assertIn("cygpath -u", joined)
             self.assertNotIn("cd /e/", joined)
 
+    def test_available_test_presets_come_from_cmake_presets(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "CMakePresets.json").write_text(
+                '{"testPresets":[{"name":"msvc-debug"},'
+                '{"name":"clang-release"}]}\n',
+                encoding="utf-8",
+            )
+
+            self.assertEqual(
+                deck.available_test_presets(root),
+                ("msvc-debug", "clang-release"),
+            )
+
+    def test_test_launcher_uses_native_visual_studio_environment(self) -> None:
+        configuration = deck.built_in_configuration()
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            launcher = root / "Tools" / "CommandDeck" / "Run-CMakeTests.ps1"
+            launcher.parent.mkdir(parents=True, exist_ok=True)
+            launcher.write_text("# fixture\n", encoding="utf-8")
+
+            vs_root = root / "Visual Studio"
+            discovery = deck.Discovery(
+                repository_root=root,
+                config_path=None,
+                wt=None,
+                python="python.exe",
+                powershell="powershell.exe",
+                git=None,
+                bash=None,
+                wsl=None,
+                vswhere=None,
+                visual_studio=deck.VisualStudioInstance(
+                    installation_path=vs_root,
+                    display_name="Visual Studio",
+                    installation_version="18.0",
+                    dev_shell_path=vs_root / "Launch-VsDevShell.ps1",
+                ),
+                wsl_distributions=(),
+                selected_wsl_distribution=None,
+            )
+
+            command = deck.build_test_launcher_command(
+                discovery,
+                configuration,
+                "msvc-debug",
+                no_build=True,
+            )
+
+            self.assertIn(str(launcher), command)
+            self.assertIn("msvc-debug", command)
+            self.assertIn("-NoBuild", command)
+            self.assertNotIn("wsl.exe", command)
+
 
 
 if __name__ == "__main__":

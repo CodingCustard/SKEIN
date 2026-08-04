@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # Copyright Coding Custard Studios.
 
-"""SKEIN Command Deck v1.3.
+"""SKEIN Command Deck v1.4.
 
 Launch a repeatable Windows Terminal workspace containing SKEIN CMake build,
 Git Bash, and Visual Studio Developer PowerShell panes.
@@ -26,7 +26,7 @@ import sys
 from typing import Any, Iterable, Mapping, Sequence
 
 
-SCRIPT_VERSION = "1.3.0"
+SCRIPT_VERSION = "1.4.0"
 CONFIG_SCHEMA_VERSION = 1
 DEFAULT_REPOSITORY_ROOT = Path(r"E:\SkeinEngine")
 DEFAULT_CONFIG_RELATIVE = Path("Tools") / "CommandDeck" / "CommandDeck.json"
@@ -41,6 +41,7 @@ EXIT_DISCOVERY = 20
 EXIT_VISUAL_STUDIO = 21
 EXIT_WSL = 22
 EXIT_LAUNCH = 30
+EXIT_TEST = 40
 
 
 class Colour:
@@ -1165,8 +1166,91 @@ def launcher_paths(repository_root: Path) -> dict[str, Path]:
     base = repository_root / "Tools" / "CommandDeck"
     return {
         "cmakeBuild": base / "Launch-CMakeBuild.ps1",
+        "cmakeTests": base / "Run-CMakeTests.ps1",
         "vsDeveloper": base / "Launch-VSDeveloper.ps1",
     }
+
+
+def available_test_presets(repository_root: Path) -> tuple[str, ...]:
+    presets_path = repository_root / "CMakePresets.json"
+    presets = load_json_object(presets_path).get("testPresets", [])
+    if not isinstance(presets, list):
+        raise CommandDeckError(
+            "CMakePresets.json testPresets must be an array.",
+            EXIT_CONFIGURATION,
+        )
+
+    names: list[str] = []
+    for index, preset in enumerate(presets):
+        if not isinstance(preset, Mapping):
+            raise CommandDeckError(
+                f"testPresets[{index}] must be an object.",
+                EXIT_CONFIGURATION,
+            )
+        name = preset.get("name")
+        if not isinstance(name, str):
+            raise CommandDeckError(
+                f"testPresets[{index}].name must be a string.",
+                EXIT_CONFIGURATION,
+            )
+        names.append(validate_text(name, f"testPresets[{index}].name"))
+
+    if not names:
+        raise CommandDeckError(
+            "CMakePresets.json defines no test presets.",
+            EXIT_CONFIGURATION,
+        )
+    return tuple(names)
+
+
+def build_test_launcher_command(
+    discovery: Discovery,
+    configuration: Mapping[str, Any],
+    preset: str,
+    *,
+    no_build: bool,
+) -> list[str]:
+    if not discovery.powershell:
+        raise CommandDeckError(
+            "PowerShell is required to run tests.",
+            EXIT_DISCOVERY,
+        )
+    if not discovery.visual_studio:
+        raise CommandDeckError(
+            "Visual Studio developer environment is required to run tests.",
+            EXIT_VISUAL_STUDIO,
+        )
+
+    launcher = launcher_paths(discovery.repository_root)["cmakeTests"]
+    if not launcher.is_file():
+        raise CommandDeckError(
+            f"CMake test launcher does not exist: {launcher}",
+            EXIT_REPOSITORY,
+        )
+
+    arch, host_arch = visual_studio_architecture(configuration)
+    command = [
+        discovery.powershell,
+        "-NoLogo",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        str(launcher),
+        "-VsInstall",
+        str(discovery.visual_studio.installation_path),
+        "-RepositoryRoot",
+        str(discovery.repository_root),
+        "-Preset",
+        preset,
+        "-Arch",
+        arch,
+        "-HostArch",
+        host_arch,
+    ]
+    if no_build:
+        command.append("-NoBuild")
+    return command
 
 
 def visual_studio_architecture(
@@ -1815,6 +1899,69 @@ def paths_command(arguments: argparse.Namespace) -> int:
     return EXIT_OK
 
 
+def test_command(arguments: argparse.Namespace) -> int:
+    configuration, discovery = prepare_context(arguments)
+    presets = available_test_presets(discovery.repository_root)
+
+    if getattr(arguments, "all_presets", False):
+        if getattr(arguments, "preset", None):
+            raise CommandDeckError(
+                "Choose either a single test preset or --all, not both.",
+                EXIT_USAGE,
+            )
+        selected_presets = presets
+    else:
+        selected = getattr(arguments, "preset", None) or "msvc-debug"
+        if selected not in presets:
+            raise CommandDeckError(
+                f"Unknown test preset {selected!r}. Available presets: "
+                + ", ".join(presets),
+                EXIT_USAGE,
+            )
+        selected_presets = (selected,)
+
+    for preset in selected_presets:
+        command = build_test_launcher_command(
+            discovery,
+            configuration,
+            preset,
+            no_build=bool(getattr(arguments, "no_build", False)),
+        )
+        print()
+        print(
+            colour(
+                f"SKEIN TESTS - {preset}",
+                Colour.BOLD + Colour.ORANGE,
+            )
+        )
+        if getattr(arguments, "verbose", False):
+            print(format_command(command))
+        sys.stdout.flush()
+
+        try:
+            result = subprocess.run(
+                command,
+                cwd=discovery.repository_root,
+                shell=False,
+                check=False,
+            )
+        except OSError as error:
+            raise CommandDeckError(
+                f"Test launcher failed: {error}",
+                EXIT_TEST,
+            ) from error
+        if result.returncode != 0:
+            print_error(
+                f"Test preset {preset!r} failed with exit code "
+                f"{result.returncode}."
+            )
+            return EXIT_TEST
+
+    print()
+    print(colour("All selected test presets passed.", Colour.GREEN))
+    return EXIT_OK
+
+
 def init_config_command(arguments: argparse.Namespace) -> int:
     repository_root = find_repository_root(
         getattr(arguments, "root", None)
@@ -1966,6 +2113,28 @@ def build_argument_parser() -> argparse.ArgumentParser:
     )
     add_common_options(paths_parser)
 
+    test_parser = subparsers.add_parser(
+        "test",
+        help="Configure, build, and run a CMake test preset.",
+    )
+    add_common_options(test_parser)
+    test_parser.add_argument(
+        "preset",
+        nargs="?",
+        help="Test preset; defaults to msvc-debug.",
+    )
+    test_parser.add_argument(
+        "--all",
+        dest="all_presets",
+        action="store_true",
+        help="Run every test preset from CMakePresets.json.",
+    )
+    test_parser.add_argument(
+        "--no-build",
+        action="store_true",
+        help="Run CTest without configuring or rebuilding first.",
+    )
+
     config_parser = subparsers.add_parser(
         "init-config",
         help="Write the default configuration to the repository.",
@@ -2014,6 +2183,7 @@ def interactive_menu(parser: argparse.ArgumentParser) -> int:
         print("  4. Check environment and paths")
         print("  5. Preview Full Development command")
         print("  6. Validate all profiles")
+        print("  7. Build and run MSVC Debug tests")
         print("  0. Exit")
         print()
 
@@ -2073,6 +2243,15 @@ def interactive_menu(parser: argparse.ArgumentParser) -> int:
             input("\nPress Enter to return to Command Deck...")
             continue
 
+        if selection == "7":
+            namespace = parser.parse_args(["test", "msvc-debug"])
+            try:
+                test_command(namespace)
+            except CommandDeckError as error:
+                print_error(str(error))
+            input("\nPress Enter to return to Command Deck...")
+            continue
+
         print(colour("Unknown selection.", Colour.YELLOW))
 
 
@@ -2102,6 +2281,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         return list_profiles_command(arguments)
     if arguments.command == "paths":
         return paths_command(arguments)
+    if arguments.command == "test":
+        return test_command(arguments)
     if arguments.command == "init-config":
         return init_config_command(arguments)
 

@@ -1,4 +1,4 @@
-# SKEIN Command Deck v1.1
+# SKEIN Command Deck v1.4
 
 SKEIN Command Deck opens the current Windows x64 development shells inside one Windows Terminal workspace.
 
@@ -63,6 +63,24 @@ py .\Tools\SkeinCommandDeck.py open full --no-startup
 ```
 
 ## Tests
+
+Build and run the default `msvc-debug` test preset directly from Command Deck:
+
+```powershell
+py .\Tools\SkeinCommandDeck.py test
+```
+
+Choose one preset, run all presets, or skip the configure/build step:
+
+```powershell
+py .\Tools\SkeinCommandDeck.py test clang-release
+py .\Tools\SkeinCommandDeck.py test --all
+py .\Tools\SkeinCommandDeck.py test msvc-debug --no-build
+```
+
+The interactive menu also includes **Build and run MSVC Debug tests**.
+
+### Command Deck unit tests
 
 ```powershell
 py -m unittest discover -s .\Tests\Tools\CommandDeck -p "test_*.py"
