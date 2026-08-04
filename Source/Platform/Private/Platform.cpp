@@ -4,6 +4,8 @@
 #include <Skein/Foundation/Log.h>
 #include <Skein/Foundation/Memory.h>
 
+#include <SDL3/SDL.h>
+
 #include <Windows.h>
 #include <DbgHelp.h>
 #include <ShObjIdl.h>
@@ -23,8 +25,6 @@ namespace Skein
             wchar_t,
             std::char_traits<wchar_t>,
             SkeinAllocator<wchar_t>>;
-
-        constexpr wchar_t WindowClassName[] = L"SkeinPlatformWindowClass";
 
         void TracePlatform(const StringView message)
         {
@@ -136,42 +136,6 @@ namespace Skein
             }
         }
 
-        LRESULT CALLBACK SkeinWindowProcedure(
-            const HWND window,
-            const UINT message,
-            const WPARAM wParam,
-            const LPARAM lParam)
-        {
-            if (message == WM_CLOSE)
-            {
-                DestroyWindow(window);
-                return 0;
-            }
-            return DefWindowProcW(window, message, wParam, lParam);
-        }
-
-        [[nodiscard]] Result<void> EnsureWindowClassRegistered()
-        {
-            static std::once_flag registrationFlag;
-            static bool registrationSucceeded = false;
-            std::call_once(registrationFlag, []
-            {
-                WNDCLASSEXW windowClass{};
-                windowClass.cbSize = sizeof(windowClass);
-                windowClass.lpfnWndProc = SkeinWindowProcedure;
-                windowClass.hInstance = GetModuleHandleW(nullptr);
-                windowClass.hCursor = LoadCursorW(nullptr, IDC_ARROW);
-                windowClass.lpszClassName = WindowClassName;
-                registrationSucceeded = RegisterClassExW(&windowClass) != 0 ||
-                    GetLastError() == ERROR_CLASS_ALREADY_EXISTS;
-            });
-            if (!registrationSucceeded)
-            {
-                return Unexpected{WindowsError(ErrorCode::Internal, "window class registration failed")};
-            }
-            return {};
-        }
-
         struct ThreadStartContext final
         {
             PlatformThreadEntry Entry = nullptr;
@@ -210,6 +174,11 @@ namespace Skein
         return "Windows x64";
     }
 
+    std::string_view Platform::WindowingLibrary() noexcept
+    {
+        return "SDL3";
+    }
+
     NativeWindow::NativeWindow(
         void* const handle,
         const u32 ownerThreadId,
@@ -246,7 +215,7 @@ namespace Skein
 
     bool NativeWindow::IsOpen() const noexcept
     {
-        return m_handle != nullptr && IsWindow(static_cast<HWND>(m_handle)) != FALSE;
+        return m_handle != nullptr;
     }
 
     bool NativeWindow::IsGenerationValid(const u64 generation) const noexcept
@@ -264,11 +233,8 @@ namespace Skein
         {
             return Unexpected{Error{ErrorCode::InvalidState, "window closed from non-owner thread"}};
         }
-        if (IsWindow(static_cast<HWND>(m_handle)) != FALSE &&
-            DestroyWindow(static_cast<HWND>(m_handle)) == FALSE)
-        {
-            return Unexpected{WindowsError(ErrorCode::Internal, "window destruction failed")};
-        }
+        SDL_DestroyWindow(static_cast<SDL_Window*>(m_handle));
+        SDL_QuitSubSystem(SDL_INIT_VIDEO);
         m_handle = nullptr;
         m_ownerThreadId = 0;
         ++m_generation;
@@ -564,6 +530,10 @@ namespace Skein
         {
             return Unexpected{Error{ErrorCode::Unsupported, "Windows x64 is required"}};
         }
+        if (!SDL_InitSubSystem(SDL_INIT_VIDEO))
+        {
+            return Unexpected{Error{ErrorCode::Internal, SDL_GetError()}};
+        }
         m_config = config;
         m_diagnostics = {};
         m_diagnostics.IsInitialised = true;
@@ -581,6 +551,7 @@ namespace Skein
         {
             return;
         }
+        SDL_QuitSubSystem(SDL_INIT_VIDEO);
         m_diagnostics.IsInitialised = false;
         ++m_diagnostics.ShutdownEvents;
         m_ownerThreadId = 0;
@@ -801,51 +772,45 @@ namespace Skein
             RecordFailure();
             return Unexpected{Error{ErrorCode::InvalidArgument, "invalid window description"}};
         }
-        Result<void> windowClassResult = EnsureWindowClassRegistered();
-        if (!windowClassResult)
-        {
-            RecordFailure(GetLastError());
-            return Unexpected{windowClassResult.ErrorValue()};
-        }
-        Result<WideString> title = Utf8ToWide(description.Title);
-        if (!title)
+        if (!IsValidUtf8(description.Title))
         {
             RecordFailure();
-            return Unexpected{title.ErrorValue()};
+            return Unexpected{Error{ErrorCode::InvalidArgument, "window title is not valid UTF-8"}};
+        }
+        if (!SDL_InitSubSystem(SDL_INIT_VIDEO))
+        {
+            RecordFailure();
+            return Unexpected{Error{ErrorCode::Internal, SDL_GetError()}};
         }
 
-        const DWORD style = WS_OVERLAPPEDWINDOW;
-        RECT rectangle{
-            0,
-            0,
-            static_cast<LONG>(description.Width),
-            static_cast<LONG>(description.Height)};
-        if (AdjustWindowRect(&rectangle, style, FALSE) == FALSE)
+        String title;
+        try
         {
-            RecordFailure(GetLastError());
-            return Unexpected{WindowsError(ErrorCode::Internal, "window rectangle calculation failed")};
+            title.assign(description.Title);
         }
-        HWND const window = CreateWindowExW(
-            0,
-            WindowClassName,
-            title.Value().c_str(),
-            style,
-            CW_USEDEFAULT,
-            CW_USEDEFAULT,
-            rectangle.right - rectangle.left,
-            rectangle.bottom - rectangle.top,
-            nullptr,
-            nullptr,
-            GetModuleHandleW(nullptr),
-            nullptr);
+        catch (const std::bad_alloc&)
+        {
+            SDL_QuitSubSystem(SDL_INIT_VIDEO);
+            RecordFailure();
+            return Unexpected{Error{ErrorCode::OutOfMemory, "window title allocation failed"}};
+        }
+
+        SDL_WindowFlags flags = 0;
+        if (!description.Visible)
+        {
+            flags |= SDL_WINDOW_HIDDEN;
+        }
+        SDL_Window* const window = SDL_CreateWindow(
+            title.c_str(),
+            static_cast<int>(description.Width),
+            static_cast<int>(description.Height),
+            flags);
         if (window == nullptr)
         {
-            RecordFailure(GetLastError());
-            return Unexpected{WindowsError(ErrorCode::Internal, "window creation failed")};
-        }
-        if (description.Visible)
-        {
-            ShowWindow(window, SW_SHOW);
+            const Error error{ErrorCode::Internal, SDL_GetError()};
+            SDL_QuitSubSystem(SDL_INIT_VIDEO);
+            RecordFailure();
+            return Unexpected{error};
         }
 
         const u64 generation = m_nextGeneration.fetch_add(1, std::memory_order_relaxed);

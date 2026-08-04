@@ -12,12 +12,14 @@ target_include_directories(SkeinPlatform
 
 target_link_libraries(SkeinPlatform
     PUBLIC SKEIN::Foundation
-    PRIVATE SKEIN::ProjectOptions
+    PRIVATE
+        SKEIN::ProjectOptions
+        SDL3::SDL3
 )
 
 if(WIN32)
     target_compile_definitions(SkeinPlatform PRIVATE SKEIN_PLATFORM_WINDOWS=1)
-    target_link_libraries(SkeinPlatform PRIVATE dbghelp ole32 shell32 user32)
+    target_link_libraries(SkeinPlatform PRIVATE dbghelp ole32 shell32)
 endif()
 
 skein_apply_warnings(SkeinPlatform)

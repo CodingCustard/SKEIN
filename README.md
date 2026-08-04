@@ -47,6 +47,7 @@ All presets use:
 - CMake
 - Ninja
 - Dynamic MSVC runtime libraries
+- SDL3 3.4.10, fetched and built statically by CMake
 
 ## Requirements
 
@@ -128,10 +129,16 @@ The initial project produces the following executables:
 | Module | Responsibility |
 |---|---|
 | `SkeinFoundation` | Core types, logging, utilities, and shared low-level functionality |
-| `SkeinPlatform` | Windows platform abstraction |
+| `SkeinPlatform` | Windows platform abstraction with SDL3 windowing |
 | `SkeinCore` | Engine lifecycle and high-level coordination |
 | `SkeinUI` | Native retained-mode UI framework |
 | `SkeinTrace` | Runtime tracing foundation for SkeinInsights |
+
+## Third-Party Dependencies
+
+| Dependency | Version | Licence | Use |
+|---|---:|---|---|
+| [SDL](https://github.com/libsdl-org/SDL) | 3.4.10 | zlib | Platform window creation and lifecycle |
 
 ## Planned Architecture
 

@@ -34,6 +34,10 @@ int main()
     {
         return 2;
     }
+    if (Platform::WindowingLibrary() != "SDL3")
+    {
+        return 28;
+    }
 
     Result<ProcessInfo> processResult = platform.QueryProcessInfo();
     if (!processResult || processResult.Value().ProcessId == 0 ||
@@ -185,10 +189,18 @@ int main()
         return 24;
     }
 
+    Result<NativeWindow> lifetimeWindowResult = platform.CreateNativeWindow(
+        NativeWindowDescription{"SKEIN Window Lifetime Test", 160, 100, false});
+    if (!lifetimeWindowResult)
+    {
+        return 29;
+    }
+    NativeWindow lifetimeWindow = std::move(lifetimeWindowResult.Value());
+
     const PlatformDiagnostics activeDiagnostics = platform.GetDiagnostics();
     if (!activeDiagnostics.IsInitialised || activeDiagnostics.StartupEvents != 1 ||
         activeDiagnostics.OperationEvents < 8 || activeDiagnostics.FailureEvents < 7 ||
-        activeDiagnostics.WindowsCreated != 1 || activeDiagnostics.ThreadsCreated != 1 ||
+        activeDiagnostics.WindowsCreated != 2 || activeDiagnostics.ThreadsCreated != 1 ||
         activeDiagnostics.LibrariesLoaded != 1 ||
         activeDiagnostics.VirtualMemoryReservations != 1)
     {
@@ -198,7 +210,7 @@ int main()
     platform.Shutdown();
     const PlatformDiagnostics shutdownDiagnostics = platform.GetDiagnostics();
     if (shutdownDiagnostics.IsInitialised || shutdownDiagnostics.ShutdownEvents != 1 ||
-        platform.QueryProcessInfo())
+        platform.QueryProcessInfo() || !lifetimeWindow.IsOpen() || !lifetimeWindow.Close())
     {
         return 26;
     }

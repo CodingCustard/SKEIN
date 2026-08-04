@@ -15,6 +15,7 @@ namespace Skein
     {
     public:
         [[nodiscard]] static std::string_view Name() noexcept;
+        [[nodiscard]] static std::string_view WindowingLibrary() noexcept;
     };
 
     struct ProcessInfo final

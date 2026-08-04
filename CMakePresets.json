@@ -49,6 +49,7 @@
       "binaryDir": "${sourceDir}/Build/clang-debug",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_C_COMPILER": "clang-cl",
         "CMAKE_CXX_COMPILER": "clang-cl"
       }
     },
@@ -59,6 +60,7 @@
       "binaryDir": "${sourceDir}/Build/clang-release",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_C_COMPILER": "clang-cl",
         "CMAKE_CXX_COMPILER": "clang-cl"
       }
     }
