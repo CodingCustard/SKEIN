@@ -1,11 +1,13 @@
 #pragma once
 
+#include <Skein/Foundation/Result.h>
+
 namespace Skein
 {
     class Engine final
     {
     public:
-        bool Initialise();
+        [[nodiscard]] Result<void> Initialise();
         void Tick();
         void Shutdown();
 

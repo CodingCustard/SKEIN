@@ -49,3 +49,20 @@ add_test(
     NAME Skein.Volume01.Chapter01_05.FoundationTypes
     COMMAND SkeinFoundationTypesTests
 )
+
+add_executable(SkeinErrorResultTests
+    Foundation/ErrorResultTests.cpp
+)
+
+target_link_libraries(SkeinErrorResultTests
+    PRIVATE
+        SKEIN::ProjectOptions
+        SKEIN::Foundation
+)
+
+skein_apply_warnings(SkeinErrorResultTests)
+
+add_test(
+    NAME Skein.Volume01.Chapter01_06.ErrorResultAssertions
+    COMMAND SkeinErrorResultTests
+)

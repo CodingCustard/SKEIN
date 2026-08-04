@@ -7,11 +7,11 @@
 
 namespace Skein
 {
-    bool Engine::Initialise()
+    Result<void> Engine::Initialise()
     {
         Log(LogLevel::Info, "Core", std::string("Initialising SKEIN on ") + std::string(Platform::Name()));
         m_running = true;
-        return true;
+        return {};
     }
 
     void Engine::Tick()

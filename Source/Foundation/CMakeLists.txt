@@ -18,10 +18,14 @@ configure_file(
 )
 
 add_library(SkeinFoundation STATIC
+    Private/Assert.cpp
     Private/Log.cpp
+    Public/Skein/Foundation/Assert.h
     Public/Skein/Foundation/Build.h
     Public/Skein/Foundation/Endian.h
+    Public/Skein/Foundation/Error.h
     Public/Skein/Foundation/Log.h
+    Public/Skein/Foundation/Result.h
     Public/Skein/Foundation/StrongId.h
     Public/Skein/Foundation/Types.h
 )
