@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Skein/Foundation/Result.h>
+#include <Skein/Foundation/Memory.h>
 
 #include <algorithm>
 #include <functional>
@@ -10,11 +10,28 @@
 
 namespace Skein
 {
-    template<typename Key, typename Value, typename Compare = std::less<Key>>
+    template<
+        typename Key,
+        typename Value,
+        typename Compare = std::less<Key>,
+        typename Allocator = SkeinAllocator<std::pair<Key, Value>>>
     class FlatMap final
     {
     public:
         using Entry = std::pair<Key, Value>;
+
+        FlatMap() = default;
+
+        explicit FlatMap(const Allocator& allocator)
+            : m_entries(allocator)
+        {
+        }
+
+        FlatMap(const Compare& compare, const Allocator& allocator)
+            : m_entries(allocator),
+              m_compare(compare)
+        {
+        }
 
         [[nodiscard]] std::size_t Size() const noexcept { return m_entries.size(); }
         [[nodiscard]] bool IsEmpty() const noexcept { return m_entries.empty(); }
@@ -102,7 +119,7 @@ namespace Skein
             return !m_compare(left, right) && !m_compare(right, left);
         }
 
-        std::vector<Entry> m_entries;
+        std::vector<Entry, Allocator> m_entries;
         Compare m_compare;
     };
 }

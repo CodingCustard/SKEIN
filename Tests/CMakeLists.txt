@@ -100,3 +100,20 @@ add_test(
     NAME Skein.Volume01.Chapter01_08.Containers
     COMMAND SkeinContainerTests
 )
+
+add_executable(SkeinMemoryArchitectureTests
+    Foundation/MemoryArchitectureTests.cpp
+)
+
+target_link_libraries(SkeinMemoryArchitectureTests
+    PRIVATE
+        SKEIN::ProjectOptions
+        SKEIN::Foundation
+)
+
+skein_apply_warnings(SkeinMemoryArchitectureTests)
+
+add_test(
+    NAME Skein.Volume01.Chapter01_09.MemoryArchitecture
+    COMMAND SkeinMemoryArchitectureTests
+)

@@ -22,6 +22,7 @@ namespace Skein
     using f64 = double;
 
     using Byte = std::byte;
+    using usize = std::size_t;
 
     template<typename T, std::size_t Extent = std::dynamic_extent>
     using Span = std::span<T, Extent>;

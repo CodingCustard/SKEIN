@@ -18,12 +18,16 @@ configure_file(
 )
 
 add_library(SkeinFoundation STATIC
+    Private/Arena.cpp
     Private/Assert.cpp
     Private/Log.cpp
+    Private/Memory.cpp
     Private/Name.cpp
     Private/Path.cpp
+    Private/Pool.cpp
     Private/String.cpp
     Private/Uuid.cpp
+    Public/Skein/Foundation/Arena.h
     Public/Skein/Foundation/Assert.h
     Public/Skein/Foundation/Build.h
     Public/Skein/Foundation/Endian.h
@@ -32,8 +36,10 @@ add_library(SkeinFoundation STATIC
     Public/Skein/Foundation/Hash.h
     Public/Skein/Foundation/IntrusiveList.h
     Public/Skein/Foundation/Log.h
+    Public/Skein/Foundation/Memory.h
     Public/Skein/Foundation/Name.h
     Public/Skein/Foundation/Path.h
+    Public/Skein/Foundation/Pool.h
     Public/Skein/Foundation/Result.h
     Public/Skein/Foundation/RingBuffer.h
     Public/Skein/Foundation/SmallVector.h

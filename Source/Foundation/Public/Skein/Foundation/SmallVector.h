@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Skein/Foundation/Result.h>
+#include <Skein/Foundation/Memory.h>
 
 #include <algorithm>
 #include <limits>
@@ -11,32 +11,48 @@
 
 namespace Skein
 {
-    template<typename T, std::size_t InlineCapacity>
+    template<
+        typename T,
+        std::size_t InlineCapacity,
+        typename Allocator = SkeinAllocator<T>>
     class SmallVector final
     {
         static_assert(InlineCapacity > 0);
 
     public:
-        SmallVector() noexcept
-            : m_data(InlineData())
+        SmallVector() noexcept(std::is_nothrow_default_constructible_v<Allocator>)
+            : m_allocator(),
+              m_data(InlineData())
+        {
+        }
+
+        explicit SmallVector(const Allocator& allocator) noexcept(
+            std::is_nothrow_copy_constructible_v<Allocator>)
+            : m_allocator(allocator),
+              m_data(InlineData())
         {
         }
 
         SmallVector(const SmallVector&) = delete;
         SmallVector& operator=(const SmallVector&) = delete;
 
-        SmallVector(SmallVector&& other) noexcept(std::is_nothrow_move_constructible_v<T>)
-            : m_data(InlineData())
+        SmallVector(SmallVector&& other) noexcept(
+            std::is_nothrow_move_constructible_v<T> &&
+            std::is_nothrow_move_constructible_v<Allocator>)
+            : m_allocator(std::move(other.m_allocator)),
+              m_data(InlineData())
         {
             MoveFrom(std::move(other));
         }
 
         SmallVector& operator=(SmallVector&& other) noexcept(
-            std::is_nothrow_move_constructible_v<T>)
+            std::is_nothrow_move_constructible_v<T> &&
+            std::is_nothrow_move_assignable_v<Allocator>)
         {
             if (this != &other)
             {
                 ReleaseStorage();
+                m_allocator = std::move(other.m_allocator);
                 m_data = InlineData();
                 m_capacity = InlineCapacity;
                 MoveFrom(std::move(other));
@@ -217,8 +233,6 @@ namespace Skein
         }
 
     private:
-        using Allocator = std::allocator<T>;
-
         [[nodiscard]] T* InlineData() noexcept
         {
             return std::launder(reinterpret_cast<T*>(m_inlineStorage));
@@ -260,13 +274,22 @@ namespace Skein
                 return;
             }
 
-            for (T& value : other)
+            try
             {
-                std::allocator_traits<Allocator>::construct(
-                    m_allocator,
-                    m_data + m_size,
-                    std::move(value));
-                ++m_size;
+                for (T& value : other)
+                {
+                    std::allocator_traits<Allocator>::construct(
+                        m_allocator,
+                        m_data + m_size,
+                        std::move(value));
+                    ++m_size;
+                }
+            }
+            catch (...)
+            {
+                std::destroy_n(m_data, m_size);
+                m_size = 0;
+                throw;
             }
             other.Clear();
         }
