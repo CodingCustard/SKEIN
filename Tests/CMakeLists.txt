@@ -134,3 +134,37 @@ add_test(
     NAME Skein.Volume01.Chapter01_10.WindowsPlatform
     COMMAND SkeinWindowsPlatformTests
 )
+
+add_executable(SkeinSynchronizationTests
+    Foundation/SynchronizationTests.cpp
+)
+
+target_link_libraries(SkeinSynchronizationTests
+    PRIVATE
+        SKEIN::ProjectOptions
+        SKEIN::Foundation
+)
+
+skein_apply_warnings(SkeinSynchronizationTests)
+
+add_test(
+    NAME Skein.Volume01.Chapter01_11.SynchronizationPrimitives
+    COMMAND SkeinSynchronizationTests
+)
+
+add_executable(SkeinJobSystemTests
+    Foundation/JobSystemTests.cpp
+)
+
+target_link_libraries(SkeinJobSystemTests
+    PRIVATE
+        SKEIN::ProjectOptions
+        SKEIN::Foundation
+)
+
+skein_apply_warnings(SkeinJobSystemTests)
+
+add_test(
+    NAME Skein.Volume01.Chapter01_12.JobSystemWorkerScheduler
+    COMMAND SkeinJobSystemTests
+)
