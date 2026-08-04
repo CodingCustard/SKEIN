@@ -1,6 +1,6 @@
 #pragma once
 
-#include <string_view>
+#include <Skein/Foundation/String.h>
 
 namespace Skein
 {
@@ -13,5 +13,5 @@ namespace Skein
         Fatal
     };
 
-    void Log(LogLevel level, std::string_view category, std::string_view message);
+    void Log(LogLevel level, StringView category, StringView message);
 }

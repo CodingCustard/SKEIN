@@ -4,7 +4,7 @@
 
 namespace Skein
 {
-    void Log(const LogLevel level, const std::string_view category, const std::string_view message)
+    void Log(const LogLevel level, const StringView category, const StringView message)
     {
         const char* levelName = "Unknown";
 

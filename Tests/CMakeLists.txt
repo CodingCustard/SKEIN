@@ -66,3 +66,37 @@ add_test(
     NAME Skein.Volume01.Chapter01_06.ErrorResultAssertions
     COMMAND SkeinErrorResultTests
 )
+
+add_executable(SkeinStringsPathsIdentifiersTests
+    Foundation/StringsPathsIdentifiersTests.cpp
+)
+
+target_link_libraries(SkeinStringsPathsIdentifiersTests
+    PRIVATE
+        SKEIN::ProjectOptions
+        SKEIN::Foundation
+)
+
+skein_apply_warnings(SkeinStringsPathsIdentifiersTests)
+
+add_test(
+    NAME Skein.Volume01.Chapter01_07.StringsPathsIdentifiers
+    COMMAND SkeinStringsPathsIdentifiersTests
+)
+
+add_executable(SkeinContainerTests
+    Foundation/ContainerTests.cpp
+)
+
+target_link_libraries(SkeinContainerTests
+    PRIVATE
+        SKEIN::ProjectOptions
+        SKEIN::Foundation
+)
+
+skein_apply_warnings(SkeinContainerTests)
+
+add_test(
+    NAME Skein.Volume01.Chapter01_08.Containers
+    COMMAND SkeinContainerTests
+)

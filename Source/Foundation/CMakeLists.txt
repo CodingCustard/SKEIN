@@ -20,14 +20,27 @@ configure_file(
 add_library(SkeinFoundation STATIC
     Private/Assert.cpp
     Private/Log.cpp
+    Private/Name.cpp
+    Private/Path.cpp
+    Private/String.cpp
+    Private/Uuid.cpp
     Public/Skein/Foundation/Assert.h
     Public/Skein/Foundation/Build.h
     Public/Skein/Foundation/Endian.h
     Public/Skein/Foundation/Error.h
+    Public/Skein/Foundation/FlatMap.h
+    Public/Skein/Foundation/Hash.h
+    Public/Skein/Foundation/IntrusiveList.h
     Public/Skein/Foundation/Log.h
+    Public/Skein/Foundation/Name.h
+    Public/Skein/Foundation/Path.h
     Public/Skein/Foundation/Result.h
+    Public/Skein/Foundation/RingBuffer.h
+    Public/Skein/Foundation/SmallVector.h
+    Public/Skein/Foundation/String.h
     Public/Skein/Foundation/StrongId.h
     Public/Skein/Foundation/Types.h
+    Public/Skein/Foundation/Uuid.h
 )
 
 add_library(SKEIN::Foundation ALIAS SkeinFoundation)

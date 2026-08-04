@@ -3,13 +3,13 @@
 #include <Skein/Foundation/Log.h>
 #include <Skein/Platform/Platform.h>
 
-#include <string>
-
 namespace Skein
 {
     Result<void> Engine::Initialise()
     {
-        Log(LogLevel::Info, "Core", std::string("Initialising SKEIN on ") + std::string(Platform::Name()));
+        String message = "Initialising SKEIN on ";
+        message.append(Platform::Name());
+        Log(LogLevel::Info, "Core", message);
         m_running = true;
         return {};
     }
