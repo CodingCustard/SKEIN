@@ -10,39 +10,28 @@ function(skein_configure_project_options)
 
     target_compile_features(SkeinProjectOptions INTERFACE cxx_std_20)
 
-if(MSVC)
-    target_compile_definitions(SkeinProjectOptions INTERFACE
-        _CRT_SECURE_NO_WARNINGS
-        NOMINMAX
-        WIN32_LEAN_AND_MEAN
-        UNICODE
-        _UNICODE
-    )
+    if(WIN32)
+        target_compile_definitions(SkeinProjectOptions INTERFACE
+            _CRT_SECURE_NO_WARNINGS
+            NOMINMAX
+            WIN32_LEAN_AND_MEAN
+            UNICODE
+            _UNICODE
+        )
+    endif()
 
-    target_compile_options(SkeinProjectOptions INTERFACE
-        /permissive-
-        /Zc:__cplusplus
-        /utf-8
-    )
-
-    if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    if(CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
         target_compile_options(SkeinProjectOptions INTERFACE
-            /Zc:preprocessor
+            /permissive-
+            /Zc:__cplusplus
+            /utf-8
         )
-    endif()
-endif()
 
-    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-        target_compile_definitions(SkeinProjectOptions INTERFACE
-            SKEIN_DEBUG=1
-            SKEIN_ENABLE_ASSERTS=1
-            SKEIN_ENABLE_TRACING=1
-        )
-    else()
-        target_compile_definitions(SkeinProjectOptions INTERFACE
-            SKEIN_RELEASE=1
-            SKEIN_ENABLE_ASSERTS=0
-            SKEIN_ENABLE_TRACING=0
-        )
+        if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+            target_compile_options(SkeinProjectOptions INTERFACE
+                /Zc:preprocessor
+            )
+        endif()
     endif()
+
 endfunction()

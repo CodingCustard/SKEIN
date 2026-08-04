@@ -1,5 +1,6 @@
 #include <Skein/Insights/Trace.h>
 
+#include <Skein/Foundation/Build.h>
 #include <Skein/Foundation/Log.h>
 
 namespace Skein::Trace

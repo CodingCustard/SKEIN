@@ -10,9 +10,15 @@ project(
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake")
 
 include(SkeinProjectOptions)
+include(SkeinCompilerChecks)
 include(SkeinWarnings)
 
 skein_configure_project_options()
+skein_validate_toolchain()
+
+if(SKEIN_BUILD_TESTS)
+    enable_testing()
+endif()
 
 add_subdirectory(Source)
 add_subdirectory(Tests)
